@@ -21,9 +21,23 @@ python app.py
 Open http://127.0.0.1:8000 and click any scenario on the left. The map tiles and Leaflet load
 from a CDN, so you need internet.
 
-Optional: set `ANTHROPIC_API_KEY` to get a Claude-written control-room briefing and extra
-AI-suggested hidden dependencies. Without a key Ripple uses a deterministic template, so the demo
-never breaks.
+### AI briefing (free)
+
+The plain-language briefing and the "hidden dependencies" come from a **free, local LLM via
+[Ollama](https://ollama.com)**, so it works offline with no API key:
+
+```bash
+ollama pull qwen2.5:3b
+```
+
+Keep Ollama running and start `python app.py`. The model loads at startup, and each briefing takes
+about 6s on a 4 GB laptop GPU. Use `RIPPLE_OLLAMA_MODEL=qwen2.5:7b` for better wording, but it
+takes about 20s.
+
+Free cloud alternatives, used only if Ollama isn't running: set `GROQ_API_KEY` (free key from
+console.groq.com) or `GEMINI_API_KEY` (free key from aistudio.google.com). `ANTHROPIC_API_KEY` (Claude,
+paid) is also supported. If no provider answers, Ripple falls back to a deterministic template,
+so the demo never breaks. The badge next to the briefing shows which provider answered.
 
 ## The five-stage pipeline (as in our proposal)
 
@@ -33,7 +47,7 @@ never breaks.
 | 2. Dependency graph | `city.py`, `engine.build_graph` | NetworkX graph of 27 junctions and 36 road segments (bridges and flyovers included), plus 6 hospitals, 4 ambulance bases, 2 drug depots, 6 schools, 4 workplaces and 11 residential zones with population, elderly %, children %, low-income % and daily-wage %. Every zone depends on emergency care, a school, a workplace and a medicine supply line. |
 | 3. Cascade engine | `engine.run_cascade` | Applies the event (cuts or slows edges, adds spill-over congestion on diverted roads, cuts hospital capacity, closes facilities, adds casualty or outbreak surges). Then reruns Dijkstra on the damaged graph and compares each dependency with the baseline. **2nd order:** ambulance response delay, school-bus routes cut, pharmacy restock delayed, commutes broken, cold chain at risk. **3rd order:** patients rerouted to other hospitals overload their ERs, elderly miss chronic medicines after the ~12h stock buffer runs out, low-income children miss mid-day meals, daily-wage income is lost (₹), households become food-insecure. |
 | 4. Impact scoring | `engine.score` | Score = severity × reach (log of people affected) × vulnerability (elderly, low-income, children) × urgency (how soon it lands) × feedback calibration. Bands: Critical / High / Medium / Low. |
-| 5. Alert dashboard + feedback loop | `static/`, `feedback.py`, `llm.py` | Map (cut, slowed and congested roads; zones coloured by their worst alert; overloaded hospitals enlarged), ranked alerts with suggested actions and alternate routes, a cascade tree, a timeline and hospital load. Responders mark each alert ✓/✗. Per-category precision then re-weights future scores. Claude (optional) writes the briefing and lists hidden dependencies the graph doesn't model. |
+| 5. Alert dashboard + feedback loop | `static/`, `feedback.py`, `llm.py` | Map (cut, slowed and congested roads; zones coloured by their worst alert; overloaded hospitals enlarged), ranked alerts with suggested actions and alternate routes, a cascade tree, a timeline and hospital load. Responders mark each alert ✓/✗. Per-category precision then re-weights future scores. A local LLM (Ollama, free) writes the briefing and lists hidden dependencies the graph doesn't model. |
 
 ## Demo script (3 minutes)
 
@@ -54,7 +68,7 @@ never breaks.
 - `GET  /api/graph`: nodes, edges and facilities
 - `GET  /api/scenarios`: the scripted events
 - `POST /api/simulate`: event JSON → `{first_order, impacts[], hospital_load, totals, graph_state}`
-- `POST /api/brief`: event JSON → plain-language briefing (Claude, or a template fallback)
+- `POST /api/brief`: event JSON → plain-language briefing (Ollama / Groq / Gemini / Claude, or a template fallback)
 - `POST /api/feedback`: `{category, happened}` → calibration stats
 
 ## Honest limitations / next steps

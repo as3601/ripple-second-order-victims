@@ -120,7 +120,8 @@ async function run(ev) {
   api("/api/brief", ev).then((b) => {
     if (lastEvent !== ev) return;
     $("#brief").textContent = b.briefing;
-    $("#brief-src").textContent = b.source === "claude" ? "Claude · AI briefing" : "template briefing";
+    const SRC = { ollama: "Local AI (Ollama) · offline", groq: "AI · Groq", gemini: "AI · Gemini", claude: "AI · Claude" };
+    $("#brief-src").textContent = SRC[b.source] || "template briefing";
     if (b.hidden_links?.length) { current.hidden_links = [...b.hidden_links, ...current.hidden_links]; renderCascade(current); }
   }).catch(() => { $("#brief").textContent = "Briefing unavailable."; });
 }
@@ -188,7 +189,7 @@ function renderCascade(r) {
     ${col("First order — what broke", firstItems, "o1")}<div class="arrow">↓</div>
     ${col("Second order — who depends on it", by(2), "o2")}<div class="arrow">↓</div>
     ${col("Third order — who is hurt next", by(3), "o3")}<div class="arrow">↓</div>
-    <div class="col"><h4>AI-suggested hidden dependencies (unverified)</h4>${r.hidden_links.map((h) => `<div class="node ai">${h.source === "claude" ? "✦ " : ""}${esc(h.text)}</div>`).join("")}</div>
+    <div class="col"><h4>AI-suggested hidden dependencies (unverified)</h4>${r.hidden_links.map((h) => `<div class="node ai">${h.source !== "heuristic" ? "✦ " : ""}${esc(h.text)}</div>`).join("")}</div>
   </div>`;
 }
 

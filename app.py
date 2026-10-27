@@ -108,5 +108,8 @@ def index():
 
 
 if __name__ == "__main__":
+    import threading
+
     import uvicorn
+    threading.Thread(target=llm.warm_up, daemon=True).start()
     uvicorn.run(app, host="127.0.0.1", port=8000)

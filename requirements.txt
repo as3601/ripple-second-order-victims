@@ -1,4 +1,4 @@
 fastapi>=0.110
 uvicorn[standard]>=0.29
 networkx>=3.2
-anthropic>=1.0  # optional: AI briefing
+anthropic>=1.0  # optional, only for the paid Claude provider
