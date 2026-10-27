@@ -29,7 +29,12 @@ DEMO = [
      "Dengue cases rising in Burail. Remove standing water at home and use mosquito nets.",
      [(5 * HOUR, "Fogging drive started in Burail and Sector 45."),
       (2 * HOUR, "Extra fever clinic opened at GMCH-32.")]),
+    ("flyover", "traffic", 4, 6, 9 * HOUR,
+     "Tribune Chowk flyover closed after an accident. Use Dakshin Marg or Madhya Marg.",
+     [(7 * HOUR, "Crane on site; one lane cleared for ambulances."),
+      (4 * HOUR, "Damaged vehicles removed. Road surface being checked.")]),
 ]
+RESOLVED = {"flyover": 2 * HOUR}  # scenario -> resolved this long ago
 
 
 def remove():
@@ -58,8 +63,12 @@ def add():
                "history": [{"t": start, "by": dept["name"],
                             "note": f"Verified and published. Gravity {gravity}/5, expected to take {eta_h:g} h to resolve."}]
                           + [{"t": now - t, "by": dept["name"], "note": n} for t, n in updates]}
+        if sid in RESOLVED:  # already over, so the public can give feedback on it
+            done = now - RESOLVED[sid]
+            inc.update(status="resolved", resolved_at=done, updated=done)
+            inc["history"].append({"t": done, "by": dept["name"], "note": "Resolved. All lanes reopened and traffic is normal."})
         store.update("incidents", lambda d: d.__setitem__(iid, inc))
-        print("added:", inc["title"])
+        print("added:", inc["title"], "(resolved)" if sid in RESOLVED else "")
     if removed:
         print(f"(replaced {removed} earlier demo incident(s))")
 

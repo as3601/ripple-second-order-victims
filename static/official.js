@@ -2,7 +2,7 @@
 const { $, $$, esc, inr, short, when, ago, TYPES, SEV, CAT, api, toast } = R;
 $("#nav").innerHTML = R.nav("/official");
 
-let depts = {}, dept = null, M = null, reports = [], incidents = [], activeForm = null;
+let depts = {}, dept = null, M = null, reports = [], incidents = [], activeForm = null, comments = {};
 try { dept = sessionStorage.getItem("ripple_dept"); } catch {}
 
 const handles = (type) => { const t = depts[dept]?.types; return t === "all" || (t || []).includes(type); };
@@ -261,7 +261,8 @@ $('.tabs2 [data-tab="field"]').addEventListener("click", () => { activeForm = fi
 
 // ============================================================== incidents
 async function loadIncidents() {
-  incidents = (await api("/api/incidents")).filter((i) => handles(i.event.type));
+  [incidents, comments] = await Promise.all([api("/api/incidents"), api("/api/comments")]);
+  incidents = incidents.filter((i) => handles(i.event.type));
   const active = incidents.filter((i) => i.status === "active");
   $("#c-incidents").textContent = active.length; $("#c-incidents").hidden = !active.length;
   renderIncidents();
@@ -295,12 +296,32 @@ function renderIncidents() {
           <div class="actions"><button class="btn primary" type="button" data-save="${i.id}">💾 Save update</button>
             <button class="btn ok" type="button" data-resolve="${i.id}">🏁 Resolve &amp; file after-action report</button></div>
         </div>
-        <div data-aar-host="${i.id}"></div>` : ""}
+        <div data-aar-host="${i.id}"></div>` : publicFeedback(i.id)}
       </div>
     </article>`;
   }).join("");
 }
+function publicFeedback(iid) {
+  const cs = comments[iid] || [], vis = cs.filter((c) => !c.hidden);
+  const avg = vis.length ? (vis.reduce((a, c) => a + c.rating, 0) / vis.length).toFixed(1) : null;
+  return `<div class="form-box"><h4>💬 Public feedback ${avg ? `· <span class="stars">★</span> ${avg}/5 from ${vis.length}` : ""}</h4>
+    ${cs.length ? [...cs].reverse().map((c) => `<div class="comment${c.hidden ? " hidden-c" : ""}">
+      <div><span class="stars">${"★".repeat(c.rating)}${"☆".repeat(5 - c.rating)}</span> <b>${esc(c.name || "Anonymous")}</b>
+        <small>${[c.area_name && esc(c.area_name), c.affected ? "was affected" : null, ago(c.t), c.hidden ? "hidden from public" : null].filter(Boolean).join(" · ")}</small>
+        <button class="btn" type="button" style="float:right;padding:3px 9px;font-size:12px" data-hide="${iid}|${c.id}|${!c.hidden}">${c.hidden ? "Show" : "Hide"}</button></div>
+      ${c.text ? `<p>${esc(c.text)}</p>` : ""}</div>`).join("") : `<p class="hint">No public feedback yet. Citizens can rate and comment on this incident from the public page.</p>`}</div>`;
+}
 $("#incident-list").addEventListener("click", async (e) => {
+  const h = e.target.closest("[data-hide]");
+  if (h) {
+    const [iid, cid, hide] = h.dataset.hide.split("|");
+    try {
+      await api(`/api/incidents/${iid}/comments/${cid}/hide`, { hidden: hide === "true", department: dept });
+      toast(hide === "true" ? "Comment hidden from the public page." : "Comment visible again.");
+      await loadIncidents(); const el = $(`#${iid} .rep-body`); if (el) el.hidden = false;
+    } catch (x) { toast(x.message); }
+    return;
+  }
   const head = e.target.closest("[data-itoggle]");
   if (head) { const b = head.nextElementSibling; b.hidden = !b.hidden; if (!b.hidden) showCascade(head.parentElement.id); return; }
   const m = e.target.closest("[data-map]"); if (m) return showCascade(m.dataset.map);

@@ -7,3 +7,4 @@ data/aars.json
 data/drill_attempts.json
 data/*.tmp
 team_access_code.txt
+data/comments.json

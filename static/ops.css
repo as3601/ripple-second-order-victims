@@ -131,6 +131,25 @@ table.calib th, table.calib td { text-align: left; padding: 7px 6px; border-bott
   border: 1px solid var(--border); border-radius: 99px; padding: 8px 16px; font-weight: 600; box-shadow: var(--shadow); }
 .sticky-map > .map-clear[hidden] { display: none; }
 
+/* public feedback on resolved incidents */
+.stars { color: #f59e0b; letter-spacing: 1px; }
+.fb-sum { font-size: 15px; margin: 4px 0 8px; }
+.rate { border: 0; padding: 0; margin: 0 0 10px; display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.rate legend { font-weight: 600; font-size: 14px; margin-bottom: 4px; padding: 0; }
+.rate .req { color: var(--crit); }
+.rate label { cursor: pointer; }
+.rate input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rate span { font-size: 32px; line-height: 1; color: #cbd5e1; padding: 0 2px; }
+.rate:has(input:checked) label span { color: #f59e0b; }
+.rate label:has(input:checked) ~ label span { color: #cbd5e1; }
+.rate input:focus-visible + span { outline: 2px solid var(--primary); border-radius: 4px; }
+.rate-txt { margin-left: 8px; color: var(--muted); font-size: 13px; }
+.comments { margin-top: 12px; }
+.comment { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.comment small { color: var(--muted); margin-left: 4px; }
+.comment p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment.hidden-c { opacity: .5; }
+
 /* drills */
 .drill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 .drill { text-align: left; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; }

@@ -93,7 +93,8 @@ function renderList() {
       <p class="links"><a class="btn" href="/drills">🎯 Training drills</a><a class="btn" href="/official">🏛️ Officials' console</a></p>
     </div>`;
   $("#resolved").innerHTML = data.resolved.length ? `<h3>Recently resolved</h3>` + data.resolved.map((i) =>
-    `<button type="button" class="inc-card done" data-id="${i.id}"><span class="ico">✅</span><b>${esc(i.title)}</b><span></span><small class="stamps">${stamp(i)}</small><small>${fixLine(i)}</small></button>`).join("") : "";
+    `<button type="button" class="inc-card done" data-id="${i.id}"><span class="ico">✅</span><b>${i.simulated ? '<span class="sim">SIMULATED</span>' : ""}${esc(i.title)}</b><span></span><small class="stamps">${stamp(i)}</small>
+      <small>${fixLine(i)} · ${i.feedback.count ? `${stars(i.feedback.avg)} ${i.feedback.avg} from ${i.feedback.count} ${i.feedback.count > 1 ? "people" : "person"}` : "💬 Be the first to give feedback"}</small></button>`).join("") : "";
 }
 document.addEventListener("click", (e) => { const b = e.target.closest(".inc-card"); if (b) select(b.dataset.id, true); });
 
@@ -139,7 +140,65 @@ function renderDetail() {
       }).join("")}</article>
 
     <article class="card"><h2>🕒 Official updates</h2>
-      <ul class="hist">${[...i.history].reverse().map((h) => `<li>${esc(h.note)}<small>${esc(h.by)} · ${clock(h.t)}</small></li>`).join("")}</ul></article>`;
+      <ul class="hist">${[...i.history].reverse().map((h) => `<li>${esc(h.note)}<small>${esc(h.by)} · ${clock(h.t)}</small></li>`).join("")}</ul></article>
+    ${i.status === "resolved" ? `<article class="card" id="fb-host" data-iid="${i.id}"></article>` : ""}`;
+
+  // Keep a half-written comment when the page refreshes (every minute) or the area changes.
+  if (fbNode?.dataset.iid === i.id && $("#fb-host")) $("#fb-host").replaceWith(fbNode);
+  else if (i.status === "resolved") loadFeedback(i.id);
+}
+
+// ---- public feedback on resolved incidents
+const stars = (n) => "★★★★★".slice(0, Math.round(n)) + "☆☆☆☆☆".slice(Math.round(n));
+let fbNode = null;
+
+async function loadFeedback(iid) {
+  const host = $("#fb-host");
+  if (!host) return;
+  fbNode = host;
+  const d = await api(`/api/incidents/${iid}/comments`);
+  const s = d.summary;
+  host.innerHTML = `
+    <h2>💬 How was this handled?</h2>
+    <p class="hint" style="margin-top:-6px">This problem has been resolved. Tell officials how it went: your feedback is shared with the department and helps Ripple learn.</p>
+    ${s.count ? `<p class="fb-sum"><span class="stars">${stars(s.avg)}</span> <b>${s.avg}/5</b> from ${s.count} ${s.count > 1 ? "people" : "person"}${s.affected ? ` · ${s.affected} said they were affected` : ""}</p>` : ""}
+    <form class="form-box fb-form" novalidate>
+      <fieldset class="rate"><legend>How well was it handled? <span class="req">*</span></legend>
+        ${[1, 2, 3, 4, 5].map((n) => `<label><input type="radio" name="rating" value="${n}" required><span title="${["Very poorly", "Poorly", "Okay", "Well", "Very well"][n - 1]}">★</span></label>`).join("")}
+        <small class="rate-txt"></small></fieldset>
+      <div class="row2">
+        <label class="field">Were you affected?<select name="affected"><option value="">Prefer not to say</option><option value="yes">Yes</option><option value="no">No</option></select></label>
+        <label class="field">Your area (optional)<select name="area"><option value="">—</option>${data.zones.map((z) => `<option value="${z.id}"${z.id === myZone ? " selected" : ""}>${esc(z.name)}</option>`).join("")}</select></label>
+      </div>
+      <label class="field">Your comment (optional)<textarea name="text" maxlength="500" placeholder="What went well? What could officials do better next time?"></textarea></label>
+      <label class="field">Your name (optional)<input type="text" name="name" maxlength="40" placeholder="Leave blank to post anonymously"></label>
+      <div class="actions"><button class="btn primary" type="submit">Post feedback</button><small class="hint">Comments are public. Please don't share phone numbers or addresses.</small></div>
+    </form>
+    <div class="comments">${d.comments.length ? d.comments.map((c) => `
+      <div class="comment"><div><span class="stars">${stars(c.rating)}</span> <b>${esc(c.name || "Anonymous")}</b>
+        <small>${[c.area_name && esc(c.area_name), c.affected ? "was affected" : null, ago(c.t)].filter(Boolean).join(" · ")}</small></div>
+        ${c.text ? `<p>${esc(c.text)}</p>` : ""}</div>`).join("") : `<p class="hint">No feedback yet. Be the first.</p>`}</div>`;
+
+  const form = $(".fb-form", host);
+  form.addEventListener("change", (e) => {
+    if (e.target.name === "rating") $(".rate-txt", form).textContent = ["Very poorly", "Poorly", "Okay", "Well", "Very well"][e.target.value - 1];
+  });
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = new FormData(form);
+    if (!f.get("rating")) return R.toast("Please choose a star rating first.");
+    const btn = $("button[type=submit]", form);
+    btn.disabled = true;
+    try {
+      await api(`/api/incidents/${iid}/comments`, { rating: +f.get("rating"), affected: f.get("affected") ? f.get("affected") === "yes" : null,
+        area: f.get("area") || null, name: f.get("name"), text: f.get("text") });
+      R.toast("Thank you! Your feedback has been shared with officials.");
+      fbNode = null;
+      await loadFeedback(iid);
+      data.resolved = (await api("/api/public/incidents")).resolved; // update the rating on the card
+      renderList();
+    } catch (x) { R.toast(x.message); btn.disabled = false; }
+  });
 }
 
 function setZone(id) {

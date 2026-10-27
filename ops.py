@@ -13,7 +13,7 @@ import re
 import time
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 import city
@@ -381,8 +381,86 @@ def public_incidents():
         if i["status"] == "active":
             c = engine.run_cascade(incident_event(i))
             active.append({**_public_view(i, with_totals=False), "totals": c["totals"], "citizen": citizen_view(c)})
-    return {"checked_at": time.time(), "zones": _zones(), "active": active,
-            "resolved": [_public_view(i, with_totals=False) for i in incs if i["status"] == "resolved"][:5]}
+    comments = store.load("comments")
+    resolved = [{**_public_view(i, with_totals=False), "feedback": _fb_summary(comments.get(i["id"], []))}
+                for i in incs if i["status"] == "resolved"][:5]
+    return {"checked_at": time.time(), "zones": _zones(), "active": active, "resolved": resolved}
+
+
+# ------------------------------------------------------- public feedback on resolved incidents
+COMMENT_LIMIT = (5, 600)  # at most 5 comments per person per 10 minutes
+_recent = {}
+
+
+class Comment(BaseModel):
+    rating: int = Field(..., ge=1, le=5)          # how well was it handled?
+    affected: Optional[bool] = None               # were you affected?
+    area: Optional[str] = None                    # zone id
+    name: str = Field("", max_length=40)
+    text: str = Field("", max_length=500)
+
+
+def _fb_summary(cs):
+    vis = [c for c in cs if not c.get("hidden")]
+    return {"count": len(vis), "avg": round(sum(c["rating"] for c in vis) / len(vis), 1) if vis else None,
+            "affected": sum(1 for c in vis if c.get("affected"))}
+
+
+def _public_comment(c):
+    return {k: c.get(k) for k in ("id", "t", "rating", "affected", "area_name", "name", "text")}
+
+
+@router.get("/api/incidents/{iid}/comments")
+def get_comments(iid: str):
+    cs = store.load("comments").get(iid, [])
+    vis = [c for c in cs if not c.get("hidden")]
+    return {"summary": _fb_summary(cs), "comments": [_public_comment(c) for c in reversed(vis)]}
+
+
+@router.post("/api/incidents/{iid}/comments")
+def add_comment(iid: str, body: Comment, request: Request):
+    inc = store.load("incidents").get(iid)
+    if not inc:
+        raise HTTPException(404, "No such incident")
+    if inc["status"] != "resolved":
+        raise HTTPException(400, "Feedback opens once the incident is resolved")
+    if body.area and body.area not in city.ZONES:
+        raise HTTPException(400, "Unknown area")
+    who = request.headers.get("cf-connecting-ip") or (request.client.host if request.client else "?")
+    now = time.time()
+    _recent[who] = [t for t in _recent.get(who, []) if now - t < COMMENT_LIMIT[1]]
+    if len(_recent[who]) >= COMMENT_LIMIT[0]:
+        raise HTTPException(429, "Too many comments. Please try again in a few minutes.")
+    _recent[who].append(now)
+    c = {"id": store.new_id("c"), "t": now, "rating": body.rating, "affected": body.affected,
+         "area": body.area, "area_name": city.ZONES[body.area]["name"] if body.area else None,
+         "name": body.name.strip(), "text": body.text.strip(), "hidden": False}
+    store.update("comments", lambda d: d.setdefault(iid, []).append(c))
+    return get_comments(iid)
+
+
+@router.get("/api/comments", dependencies=[Depends(official)])
+def all_comments():
+    """Officials see every comment, including hidden ones."""
+    return store.load("comments")
+
+
+class Hide(BaseModel):
+    hidden: bool
+    department: str
+
+
+@router.post("/api/incidents/{iid}/comments/{cid}/hide", dependencies=[Depends(official)])
+def hide_comment(iid: str, cid: str, body: Hide):
+    _dept(body.department)
+
+    def fn(d):
+        c = next((c for c in d.get(iid, []) if c["id"] == cid), None)
+        if not c:
+            raise HTTPException(404, "No such comment")
+        c["hidden"] = body.hidden
+        return c
+    return store.update("comments", fn)
 
 
 @router.get("/api/incidents/{iid}/cascade")
@@ -407,13 +485,14 @@ def training():
 
 @router.get("/api/training/export", dependencies=[Depends(official)])
 def training_export():
-    incs, aars = store.load("incidents"), store.load("aars")
+    incs, aars, comments = store.load("incidents"), store.load("aars"), store.load("comments")
     rows = []
     for iid, a in aars.items():
         inc = incs.get(iid)
         if inc:
             rows.append({"incident_id": iid, "title": inc["title"], "event": incident_event(inc),
-                         "verification": inc.get("verification", {}).get("level"), "outcome": a})
+                         "verification": inc.get("verification", {}).get("level"), "outcome": a,
+                         "public_feedback": _fb_summary(comments.get(iid, []))})
     return {"format": "ripple-training-v1", "records": rows}
 
 
