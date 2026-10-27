@@ -90,7 +90,7 @@ function renderList() {
   }).join("") : `<div class="card empty-state">
       <b>🟢</b><h3>No active incidents</h3>
       <p>Nothing has been confirmed by officials right now. Last checked <b>${hhmm(data.checked_at)}</b>; this page checks again every minute.</p>
-      <p class="links"><a class="btn" href="/detailed">🧭 Try the simulator</a><a class="btn" href="/drills">🎯 Training drills</a><a class="btn" href="/official">🏛️ Officials' console</a></p>
+      <p class="links"><a class="btn" href="/drills">🎯 Training drills</a><a class="btn" href="/official">🏛️ Officials' console</a></p>
     </div>`;
   $("#resolved").innerHTML = data.resolved.length ? `<h3>Recently resolved</h3>` + data.resolved.map((i) =>
     `<button type="button" class="inc-card done" data-id="${i.id}"><span class="ico">✅</span><b>${esc(i.title)}</b><span></span><small class="stamps">${stamp(i)}</small><small>${fixLine(i)}</small></button>`).join("") : "";

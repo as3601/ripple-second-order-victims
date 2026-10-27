@@ -46,7 +46,7 @@ window.R = (() => {
   }
 
   function nav(active) {
-    const links = [["/public", "📢 Public alerts"], ["/official", "🏛️ Official console"], ["/drills", "🎯 Training drills"], ["/detailed", "🧭 Simulator"]];
+    const links = [["/public", "📢 Public alerts"], ["/official", "🏛️ Official console"], ["/drills", "🎯 Training drills"]];
     return `<nav class="appnav" aria-label="Ripple pages">${links.map(([h, t]) => `<a href="${h}"${h === active ? ' aria-current="page"' : ""}>${t}</a>`).join("")}</nav>`;
   }
 
