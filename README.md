@@ -101,8 +101,10 @@ Double-click **`share.bat`**. It starts Ripple and opens a free Cloudflare tunne
 access code** (saved in `team_access_code.txt`, never committed) and uses it in place of the public demo code.
 Keep the window open while your team uses it. The link changes every time you run it.
 Needs `cloudflared`, installed once with `winget install Cloudflare.cloudflared`.
-The tunnel uses HTTP/2 over TCP (`--protocol http2`) because campus Wi-Fi often blocks the UDP (QUIC) connection
-cloudflared uses by default, which made the link drop after a few minutes. Keep the laptop awake and online.
+The tunnel uses HTTP/2 over TCP (`--protocol http2`) rather than the default UDP (QUIC), which some Wi-Fi networks
+drop. Either way, cloudflared must reach Cloudflare on port 7844. Some campus networks block that port completely,
+and the link then dies within minutes. If that happens, connect the laptop to a phone hotspot. Keep the laptop
+awake and online.
 
 ### AI briefing (free)
 
