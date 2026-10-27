@@ -23,4 +23,4 @@ echo  (share it privately; it is also saved in team_access_code.txt)
 echo.
 echo  Opening the public link. Look for the line ending in .trycloudflare.com below.
 echo.
-"%CF%" tunnel --no-autoupdate --url http://127.0.0.1:8000
+"%CF%" tunnel --no-autoupdate --protocol http2 --url http://127.0.0.1:8000
