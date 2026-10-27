@@ -63,6 +63,14 @@ are exportable as a training dataset (JSON) for a future ML model, and automatic
 
 Both use the same API and engine.
 
+### Share with your team (public link)
+
+Double-click **`share.bat`**. It starts Ripple and opens a free Cloudflare tunnel, then prints a public
+`https://….trycloudflare.com` link anyone can open, phones included. It also generates a **private official
+access code** (saved in `team_access_code.txt`, never committed) and uses it in place of the public demo code.
+Keep the window open while your team uses it. The link changes every time you run it.
+Needs `cloudflared`, installed once with `winget install Cloudflare.cloudflared`.
+
 ### AI briefing (free)
 
 The plain-language briefing and the "hidden dependencies" come from a **free, local LLM via
