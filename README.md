@@ -39,6 +39,18 @@ console.groq.com) or `GEMINI_API_KEY` (free key from aistudio.google.com). `ANTH
 paid) is also supported. If no provider answers, Ripple falls back to a deterministic template,
 so the demo never breaks. The badge next to the briefing shows which provider answered.
 
+### Real-world data (OpenStreetMap)
+
+`python fetch_osm.py` (about 1 minute, needs internet) pulls live data into `osm_cache.json`:
+- **Locations** from the OSM **Nominatim** geocoder: 16 of 27 junctions and facilities (PGIMER,
+  Fortis, Civil Hospital Panchkula, ISBT-43, Tribune Chowk, Chandigarh University and others). Any
+  match more than 3 km from the expected spot is rejected, and the curated value is kept.
+- **Road travel times** from **OSRM** routing over the OSM road network: all 36 road segments,
+  with real driving distance and time × 1.4 for city traffic.
+
+The cache is committed, so the demo runs offline. The map shows a "Live data: OpenStreetMap"
+badge, and hovering a road shows its OSRM time.
+
 ## The five-stage pipeline (as in our proposal)
 
 | Stage | Where | What it does |
@@ -73,9 +85,10 @@ so the demo never breaks. The badge next to the briefing shows which provider an
 
 ## Honest limitations / next steps
 
-- City data is hand-curated for the prototype. Coordinates are approximate and populations and
-  capacities are illustrative. Next step: rebuild `city.py` automatically from OpenStreetMap
-  (OSMnx), GTFS feeds and data.gov.in facility registries, and route with OSRM.
+- Locations and road times come from OpenStreetMap and OSRM (`fetch_osm.py`). The road
+  *topology* (which junctions connect) is still a curated 36-segment network, and populations and
+  hospital capacities are illustrative. Next step: the full OSMnx street graph, GTFS bus routes, and
+  census and data.gov.in figures for populations and bed counts.
 - The rules are deterministic and the thresholds come from domain heuristics. Next step: fit
   severity and ETA from the outcome logs that the feedback loop collects (scikit-learn), and add
   agent-based traffic (Mesa).

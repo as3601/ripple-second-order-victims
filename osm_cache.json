@@ -1,0 +1,232 @@
+{
+ "fetched": "2026-10-27 14:35",
+ "source": "OpenStreetMap (Nominatim + OSRM), ODbL",
+ "junctions": {
+  "pgi": {
+   "lat": 30.763537,
+   "lon": 76.774752,
+   "osm": "PGIMER, Madhya Marg, Sector 12, Ward 2, Chandigarh, 160012, India"
+  },
+  "sec10": {
+   "lat": 30.754189,
+   "lon": 76.788961,
+   "osm": "Sector 10, Ward 1, Chandigarh, 160010, India"
+  },
+  "sec7": {
+   "lat": 30.735866,
+   "lon": 76.804283,
+   "osm": "Sector 7, Ward 1, Chandigarh, 160007, India"
+  },
+  "panchkula": {
+   "lat": 30.704611,
+   "lon": 76.855635,
+   "osm": "Civil Hospital Panchkula, Huda Field Hostel rd, Sector 6, Panchkula, Haryana, 134109, Indi"
+  },
+  "sec22": {
+   "lat": 30.733426,
+   "lon": 76.771345,
+   "osm": "Sector 22, Ward 3, Chandigarh, India"
+  },
+  "sec35": {
+   "lat": 30.726122,
+   "lon": 76.759887,
+   "osm": "Sector 35, Ward 15, Chandigarh, 160035, India"
+  },
+  "tribune": {
+   "lat": 30.70389,
+   "lon": 76.790462,
+   "osm": "Tribune Chowk, Ward 20, Chandigarh, 160002, India"
+  },
+  "industrial": {
+   "lat": 30.705405,
+   "lon": 76.800957,
+   "osm": "Phase 1, Ward 20, Chandigarh, 160002, India"
+  },
+  "ramdarbar": {
+   "lat": 30.694587,
+   "lon": 76.780807,
+   "osm": "Allen Institute, 808, Phase, 2, Ram Darbar Rd, Industrial Area Phase II, Purv Marg, Phase "
+  },
+  "sec47": {
+   "lat": 30.695811,
+   "lon": 76.769049,
+   "osm": "Sector 47, Ward 22, Chandigarh, India"
+  },
+  "fortis": {
+   "lat": 30.694799,
+   "lon": 76.73107,
+   "osm": "Fortis Hospital, SH12A, Sector 62, Mohali, S.A.S. Nagar (Mohali) Tahsil, Sahibzada Ajit Si"
+  },
+  "zirakpur": {
+   "lat": 30.655726,
+   "lon": 76.820065,
+   "osm": "Zirakpur, Dera Bassi Tahsil, Sahibzada Ajit Singh Nagar, Punjab, 140603, India"
+  },
+  "kharar": {
+   "lat": 30.748844,
+   "lon": 76.642899,
+   "osm": "Kharar, Kharar Tahsil, Sahibzada Ajit Singh Nagar, Punjab, 140300, India"
+  },
+  "landran": {
+   "lat": 30.693742,
+   "lon": 76.664678,
+   "osm": "Landran, S.A.S. Nagar (Mohali) Tahsil, Sahibzada Ajit Singh Nagar, Punjab, 140307, India"
+  },
+  "dhanas": {
+   "lat": 30.768999,
+   "lon": 76.75515,
+   "osm": "Dhanas, Chandigarh, 160014, India"
+  },
+  "cu": {
+   "lat": 30.76864,
+   "lon": 76.575048,
+   "osm": "Chandigarh University, Ludhiana - Chandigarh Highway, Lahra, Gharuan, Kharar Tahsil, Sahib"
+  }
+ },
+ "edges": {
+  "pgi|sec16": {
+   "km": 2.27,
+   "min": 3.16
+  },
+  "dhanas|pgi": {
+   "km": 3.27,
+   "min": 6.75
+  },
+  "sec16|sec17": {
+   "km": 1.21,
+   "min": 2.58
+  },
+  "sec10|sec16": {
+   "km": 1.6,
+   "min": 2.79
+  },
+  "sec10|sec7": {
+   "km": 3.96,
+   "min": 6.16
+  },
+  "sec7|transport": {
+   "km": 3.09,
+   "min": 4.33
+  },
+  "hb|transport": {
+   "km": 2.25,
+   "min": 3.56
+  },
+  "hb|manimajra": {
+   "km": 2.09,
+   "min": 4.51
+  },
+  "itpark|manimajra": {
+   "km": 1.9,
+   "min": 5.0
+  },
+  "hb|panchkula": {
+   "km": 3.32,
+   "min": 6.24
+  },
+  "sec17|sec22": {
+   "km": 2.41,
+   "min": 4.08
+  },
+  "sec17|tribune": {
+   "km": 5.74,
+   "min": 7.44
+  },
+  "sec22|sec35": {
+   "km": 2.63,
+   "min": 3.89
+  },
+  "isbt43|sec35": {
+   "km": 2.6,
+   "min": 4.4
+  },
+  "sec32|sec35": {
+   "km": 4.56,
+   "min": 5.85
+  },
+  "sec32|tribune": {
+   "km": 3.05,
+   "min": 2.79
+  },
+  "transport|tribune": {
+   "km": 4.81,
+   "min": 5.32
+  },
+  "industrial|tribune": {
+   "km": 2.16,
+   "min": 3.55
+  },
+  "industrial|ramdarbar": {
+   "km": 3.58,
+   "min": 5.64
+  },
+  "hb|industrial": {
+   "km": 4.67,
+   "min": 7.77
+  },
+  "ramdarbar|zirakpur": {
+   "km": 8.79,
+   "min": 8.73
+  },
+  "airport|zirakpur": {
+   "km": 7.85,
+   "min": 13.23
+  },
+  "panchkula|zirakpur": {
+   "km": 9.96,
+   "min": 12.3
+  },
+  "isbt43|mohali7": {
+   "km": 4.24,
+   "min": 6.21
+  },
+  "isbt43|sec47": {
+   "km": 4.63,
+   "min": 5.21
+  },
+  "sec32|sec47": {
+   "km": 1.97,
+   "min": 2.39
+  },
+  "airport|sec47": {
+   "km": 4.31,
+   "min": 6.76
+  },
+  "fortis|mohali7": {
+   "km": 1.9,
+   "min": 3.03
+  },
+  "fortis|mohali_ind": {
+   "km": 2.31,
+   "min": 3.1
+  },
+  "airport|fortis": {
+   "km": 7.27,
+   "min": 10.17
+  },
+  "kharar|mohali7": {
+   "km": 10.56,
+   "min": 10.78
+  },
+  "landran|mohali_ind": {
+   "km": 7.01,
+   "min": 7.45
+  },
+  "kharar|landran": {
+   "km": 6.87,
+   "min": 9.17
+  },
+  "cu|kharar": {
+   "km": 7.84,
+   "min": 8.65
+  },
+  "cu|landran": {
+   "km": 14.39,
+   "min": 17.04
+  },
+  "dhanas|kharar": {
+   "km": 15.03,
+   "min": 14.52
+  }
+ }
+}

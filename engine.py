@@ -7,7 +7,8 @@ import city
 import feedback
 
 SPEED_KMH = {"road": 32, "bridge": 38, "flyover": 45}
-DETOUR = 1.3  # straight-line -> road distance
+DETOUR = 1.3  # straight-line -> road distance (fallback when no OSRM data)
+TRAFFIC_FACTOR = 1.4  # OSRM gives free-flow times; daytime city traffic is slower
 
 # Thresholds (minutes of added travel time) that turn a delay into a consequence
 EMS_DELAY_MIN = 4
@@ -47,10 +48,16 @@ def build_graph():
     for jid, (name, lat, lon) in city.JUNCTIONS.items():
         g.add_node(jid, name=name, lat=lat, lon=lon)
     for a, b, kind, name in city.ROADS:
-        ja, jb = city.JUNCTIONS[a], city.JUNCTIONS[b]
-        km = haversine_km(ja[1], ja[2], jb[1], jb[2]) * DETOUR
-        g.add_edge(a, b, id=edge_id(a, b), kind=kind, name=name, km=round(km, 2),
-                   time=km / SPEED_KMH[kind] * 60)
+        eid = edge_id(a, b)
+        osm = city.OSM["edges"].get(eid)
+        if osm:  # real OSRM drive time over OSM roads, scaled for typical city traffic
+            km, minutes = osm["km"], osm["min"] * TRAFFIC_FACTOR
+        else:
+            ja, jb = city.JUNCTIONS[a], city.JUNCTIONS[b]
+            km = haversine_km(ja[1], ja[2], jb[1], jb[2]) * DETOUR
+            minutes = km / SPEED_KMH[kind] * 60
+        g.add_edge(a, b, id=eid, kind=kind, name=name, km=round(km, 2), time=minutes,
+                   source="OSRM" if osm else "estimate")
     return g
 
 
@@ -67,7 +74,12 @@ def graph_payload():
         for fid, f in table.items():
             j = city.JUNCTIONS[f["at"]]
             facilities.append({"id": fid, "kind": kind, "lat": j[1], "lon": j[2], **f})
-    return {"nodes": nodes, "edges": edges, "facilities": facilities}
+    data = {"junctions_osm": len(city.OSM["junctions"]), "junctions": len(city.JUNCTIONS),
+            "edges_osrm": len(city.OSM["edges"]), "edges": len(city.ROADS),
+            "fetched": city.OSM.get("fetched")}
+    for n in nodes:
+        n["osm"] = n["id"] in city.OSM["junctions"]
+    return {"nodes": nodes, "edges": edges, "facilities": facilities, "data": data}
 
 
 # ---------------------------------------------------------------- stage 1: event

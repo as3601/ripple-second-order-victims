@@ -39,7 +39,7 @@ function drawGraph() {
   for (const e of graph.edges) {
     const a = graph.nodes.find((n) => n.id === e.a), b = graph.nodes.find((n) => n.id === e.b);
     const line = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], baseStyle(e)).addTo(map);
-    line.bindTooltip(`${e.name} · ${e.kind} · ${e.km} km`, { sticky: true });
+    line.bindTooltip(`${e.name} · ${e.kind} · ${e.km} km · ${e.time.toFixed(1)} min${e.source === "OSRM" ? " (OSRM real road time)" : " (estimate)"}`, { sticky: true });
     line.on("click", (ev) => {
       L.DomEvent.stopPropagation(ev);
       const t = $("#ev-type").value;
@@ -239,6 +239,16 @@ $("#run").addEventListener("click", () => { try { document.querySelectorAll(".sc
   $("#ev-work").innerHTML = graph.facilities.filter((f) => f.kind === "workplace").map((f) => opt(f.id, f.name)).join("");
   $("#ev-zone").innerHTML = graph.facilities.filter((f) => f.kind === "zone").map((f) => opt(f.id, f.name)).join("");
   drawGraph(); syncForm(); loadCalib();
+  const d = graph.data;
+  if (d.edges_osrm) {
+    const src = L.control({ position: "bottomright" });
+    src.onAdd = () => {
+      const div = L.DomUtil.create("div", "legend");
+      div.innerHTML = `<b style="background:#06d6a0"></b>Live data: OpenStreetMap<br>${d.junctions_osm}/${d.junctions} locations geocoded (Nominatim)<br>${d.edges_osrm}/${d.edges} road times routed (OSRM)<br><span style="color:#8b97b3">fetched ${d.fetched}</span>`;
+      return div;
+    };
+    src.addTo(map);
+  }
   const scns = await api("/api/scenarios");
   $("#scenarios").innerHTML = scns.map((s, i) => `<button class="scn" data-i="${i}">${esc(s.label)}<small>${s.type.replace(/_/g, " ")} · ${s.duration_h}h · magnitude ${s.magnitude}</small></button>`).join("");
   $("#scenarios").addEventListener("click", (e) => {

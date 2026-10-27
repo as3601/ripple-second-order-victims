@@ -153,3 +153,17 @@ ZONES = {
                     "children": 0.19, "low_income": 0.14, "workers": 0.39, "daily_wage": 0.14,
                     "school": "s_dps", "work": "w_sec17", "depot": "d_ind"},
 }
+
+
+# ---------------------------------------------------------------------------
+# Real-world overrides from OpenStreetMap (written by fetch_osm.py). Junctions found in OSM
+# take their surveyed coordinates; road segments take OSRM driving distance and time.
+import json as _json
+from pathlib import Path as _Path
+
+_CACHE = _Path(__file__).parent / "osm_cache.json"
+OSM = _json.loads(_CACHE.read_text(encoding="utf-8")) if _CACHE.exists() else {"junctions": {}, "edges": {}}
+CURATED_JUNCTIONS = dict(JUNCTIONS)
+for _jid, _c in OSM["junctions"].items():
+    if _jid in JUNCTIONS:
+        JUNCTIONS[_jid] = (JUNCTIONS[_jid][0], _c["lat"], _c["lon"])
