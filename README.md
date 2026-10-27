@@ -2,6 +2,8 @@
 
 **Code Yudh · Chandigarh University · Track: Smart Cities & Disaster Response**
 
+**Live demo:** https://ripple-2vx1.onrender.com/public (free hosting: the first visit after a quiet spell takes about a minute to wake up)
+
 > Disaster tools map the *damage*. Ripple maps the *consequences* — and answers the question
 > nobody answers in the first hours after an event: **"Who will be affected next, and when?"**
 
