@@ -38,15 +38,18 @@ async function api(path, body) {
 function drawGraph() {
   for (const e of graph.edges) {
     const a = graph.nodes.find((n) => n.id === e.a), b = graph.nodes.find((n) => n.id === e.b);
-    const line = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], baseStyle(e)).addTo(map);
-    line.bindTooltip(`${e.name} · ${e.kind} · ${e.km} km · ${e.time.toFixed(1)} min${e.source === "OSRM" ? " (OSRM real road time)" : " (estimate)"}`, { sticky: true });
-    line.on("click", (ev) => {
+    const line = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], { ...baseStyle(e), interactive: false }).addTo(map);
+    // Wide invisible line on top so thin roads are easy to click
+    const hit = L.polyline([[a.lat, a.lon], [b.lat, b.lon]], { weight: 18, opacity: 0, color: "#000" }).addTo(map);
+    hit.bindTooltip(`<b>${e.name}</b> · ${e.kind} · ${e.km} km · ${e.time.toFixed(1)} min${e.source === "OSRM" ? " (OSRM real road time)" : " (estimate)"}<br><i>Click to break this road</i>`, { sticky: true });
+    hit.on("click", (ev) => {
       L.DomEvent.stopPropagation(ev);
       const t = $("#ev-type").value;
       if (t !== "bridge_collapse" && t !== "road_block") $("#ev-type").value = e.kind === "bridge" ? "bridge_collapse" : "road_block";
       $("#ev-edge").value = e.id; syncForm();
+      runCustom();
     });
-    edgeLayers[e.id] = { line, e };
+    edgeLayers[e.id] = { line, hit, e };
   }
   for (const f of graph.facilities) {
     if (f.kind === "zone") {
@@ -60,6 +63,9 @@ function drawGraph() {
       facLayers[f.id] = m;
     }
   }
+  // Click order: zone circles at the bottom, then roads, then facility markers on top
+  Object.values(edgeLayers).forEach(({ hit }) => hit.bringToFront());
+  Object.values(facLayers).forEach((m) => m.bringToFront());
 }
 const baseStyle = (e) => ({ color: e.kind === "bridge" ? "#4cc9f0" : e.kind === "flyover" ? "#7aa2ff" : "#5a6789", weight: e.kind === "road" ? 3 : 5, opacity: 0.85, dashArray: null });
 
@@ -67,6 +73,7 @@ map.on("click", (ev) => {
   const t = $("#ev-type").value;
   if (t !== "flood" && t !== "power_outage") return;
   setEpicentre(ev.latlng.lat, ev.latlng.lng);
+  runCustom();
 });
 function setEpicentre(lat, lon) {
   if (epicentre) map.removeLayer(epicentre);
@@ -84,9 +91,14 @@ function syncForm() {
   $("#f-zone").hidden = t !== "disease_outbreak";
   if (t === "bridge_collapse" || t === "road_block") highlightPick($("#ev-edge").value);
 }
+let pickLayer;
 function highlightPick(id) {
-  if (current) return;
-  for (const { line, e } of Object.values(edgeLayers)) line.setStyle(e.id === id ? { color: "#ffffff", weight: 7 } : baseStyle(e));
+  // Glow drawn under the result styling, so it shows both before and after a run
+  if (pickLayer) map.removeLayer(pickLayer);
+  const sel = edgeLayers[id];
+  if (!sel) return;
+  pickLayer = L.polyline(sel.line.getLatLngs(), { color: "#ffffff", weight: 13, opacity: 0.45, interactive: false }).addTo(map);
+  pickLayer.bringToBack();
 }
 function readForm() {
   const t = $("#ev-type").value;
@@ -229,7 +241,11 @@ $("#ev-type").addEventListener("change", syncForm);
 $("#ev-edge").addEventListener("change", () => highlightPick($("#ev-edge").value));
 $("#ev-mag").addEventListener("input", (e) => ($("#o-mag").value = e.target.value));
 $("#ev-radius").addEventListener("input", (e) => { $("#o-radius").value = e.target.value; if (epicentre) epicentre.setRadius(e.target.value * 1000); });
-$("#run").addEventListener("click", () => { try { document.querySelectorAll(".scn").forEach((x) => x.classList.remove("on")); current = null; run(readForm()); } catch (e) { $("#err").textContent = e.message; } });
+function runCustom() {
+  try { document.querySelectorAll(".scn").forEach((x) => x.classList.remove("on")); run(readForm()); }
+  catch (e) { $("#err").textContent = e.message; }
+}
+$("#run").addEventListener("click", runCustom);
 
 (async () => {
   graph = await api("/api/graph");
