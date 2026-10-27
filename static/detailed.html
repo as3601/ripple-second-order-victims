@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ripple · Guided view</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="/static/detailed.css?v=2">
+</head>
+<body>
+<a class="skip" href="#panel">Skip to the planner</a>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">◎</span>
+    <div>
+      <strong>Ripple</strong>
+      <span class="tagline">See who gets hurt <em>next</em>, before it happens</span>
+    </div>
+  </div>
+  <nav class="top-actions">
+    <button class="btn ghost" id="open-help" type="button">❓ How it works</button>
+    <a class="btn ghost" href="/">Classic dashboard ↗</a>
+  </nav>
+</header>
+
+<main class="layout">
+  <section class="map-wrap" aria-label="Map of the Chandigarh tricity">
+    <div id="map"></div>
+    <div class="map-banner" id="map-banner" hidden></div>
+  </section>
+
+  <section class="panel" id="panel">
+    <ol class="stepper" aria-label="Steps">
+      <li data-step="1"><button type="button"><span>1</span>What happened</button></li>
+      <li data-step="2"><button type="button"><span>2</span>Where</button></li>
+      <li data-step="3"><button type="button"><span>3</span>How bad</button></li>
+      <li data-step="4"><button type="button"><span>4</span>Who's affected</button></li>
+    </ol>
+
+    <!-- STEP 1 -->
+    <div class="step" id="step-1">
+      <h1>What happened?</h1>
+      <p class="lead">Pick the kind of disruption. Ripple will work out which people depend on what breaks.</p>
+      <div class="type-grid" id="type-grid" role="radiogroup" aria-label="Event type"></div>
+
+      <div class="divider"><span>or start from a real-world scenario</span></div>
+      <div class="scenario-grid" id="scenario-grid"></div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step-2" hidden>
+      <h1 id="where-title">Where did it happen?</h1>
+      <p class="lead" id="where-lead"></p>
+
+      <div id="where-road" hidden>
+        <label class="field">Search roads and bridges
+          <input id="road-search" type="search" placeholder="e.g. Sukhna, Madhya Marg, flyover…" autocomplete="off">
+        </label>
+        <div class="pick-list" id="road-list" role="listbox" aria-label="Roads"></div>
+      </div>
+
+      <div id="where-area" hidden>
+        <div class="callout" id="epicentre-status">👆 Click anywhere on the map to drop the centre point.</div>
+        <label class="field">How wide is the affected area? <b id="radius-out">1.5 km</b>
+          <input id="radius" type="range" min="0.5" max="4" step="0.1" value="1.5">
+        </label>
+      </div>
+
+      <div id="where-work" hidden>
+        <div class="pick-list" id="work-list" role="listbox" aria-label="Workplaces"></div>
+      </div>
+
+      <div id="where-zone" hidden>
+        <div class="pick-list" id="zone-list" role="listbox" aria-label="Areas"></div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn" type="button" data-go="1">← Back</button>
+        <button class="btn primary" type="button" id="to-step-3">Next: how bad →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step-3" hidden>
+      <h1>How bad is it, and for how long?</h1>
+      <p class="lead">Rough answers are fine. You can change them later and re-run.</p>
+
+      <fieldset class="chips-field">
+        <legend>Severity</legend>
+        <div class="chips" id="sev-chips"></div>
+        <p class="hint" id="sev-hint"></p>
+      </fieldset>
+
+      <fieldset class="chips-field">
+        <legend>Expected duration</legend>
+        <div class="chips" id="dur-chips"></div>
+        <label class="field inline">or exactly <input id="dur-custom" type="number" min="1" max="720" value="24"> hours</label>
+      </fieldset>
+
+      <div class="summary-box" id="event-summary"></div>
+
+      <div class="nav-row">
+        <button class="btn" type="button" data-go="2">← Back</button>
+        <button class="btn primary big" type="button" id="run">🔮 Show who's affected</button>
+      </div>
+      <p class="err" id="err" role="alert"></p>
+    </div>
+
+    <!-- STEP 4: RESULTS -->
+    <div class="step" id="step-4" hidden>
+      <div class="loading" id="loading" hidden>Working out the cascade…</div>
+      <div id="results"></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <div class="modal-card">
+    <button class="close" type="button" aria-label="Close" data-close>✕</button>
+    <h2 id="help-title">How Ripple works</h2>
+    <p>When a bridge collapses, everyone looks at the bridge. But that bridge was also an ambulance route, a school-bus route and a medicine supply line. Ripple finds the people hurt by those hidden dependencies: the <b>second-order victims</b>.</p>
+    <div class="orders">
+      <div class="order o1"><b>1st order</b><span>What physically broke</span><small>e.g. bridge cut, road flooded</small></div>
+      <div class="order o2"><b>2nd order</b><span>Who depended on it</span><small>e.g. ambulances 26 min late</small></div>
+      <div class="order o3"><b>3rd order</b><span>Who gets hurt next</span><small>e.g. hospital overflows, elderly miss medicines</small></div>
+    </div>
+    <h3>Under the hood</h3>
+    <ol class="how">
+      <li><b>City graph:</b> 27 junctions and 36 roads with real OpenStreetMap locations and OSRM drive times, plus hospitals, ambulances, medicine depots, schools, workplaces and 11 residential areas.</li>
+      <li><b>Break and re-route:</b> the event damages the graph, and every dependency (home → hospital, depot → pharmacy, home → school, home → work) is re-routed and compared with normal.</li>
+      <li><b>Rank:</b> each consequence is scored by severity × people × vulnerability × how soon it lands.</li>
+      <li><b>Explain:</b> a local AI writes the briefing and suggests hidden risks. Your ✓/✗ feedback re-weights future predictions.</li>
+    </ol>
+    <p class="hint">Prototype: road layout, populations and bed counts are estimates.</p>
+    <button class="btn primary" type="button" data-close>Got it</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/static/detailed.js?v=2"></script>
+</body>
+</html>

@@ -107,6 +107,12 @@ def index():
     return FileResponse(STATIC / "index.html")
 
 
+@app.get("/detailed")
+def detailed():
+    """Guided, plain-language version of the dashboard (same API)."""
+    return FileResponse(STATIC / "detailed.html")
+
+
 if __name__ == "__main__":
     import threading
 

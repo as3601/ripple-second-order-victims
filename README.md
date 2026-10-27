@@ -21,6 +21,16 @@ python app.py
 Open http://127.0.0.1:8000 and click any scenario on the left. The map tiles and Leaflet load
 from a CDN, so you need internet.
 
+### Two views
+
+- **http://127.0.0.1:8000/**: the classic control-room dashboard (dark, everything on one screen).
+- **http://127.0.0.1:8000/detailed**: a **guided view** for non-experts. Step by step (what
+  happened → where → how bad → who's affected), with a time-bucketed action checklist, filters by
+  type and area, cause chains for every alert, read-aloud and copy for the briefing, and
+  print/PDF export. It works on a phone too.
+
+Both use the same API and engine.
+
 ### AI briefing (free)
 
 The plain-language briefing and the "hidden dependencies" come from a **free, local LLM via
