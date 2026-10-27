@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ripple · Official console</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="/static/detailed.css?v=2">
+<link rel="stylesheet" href="/static/ops.css?v=1">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true">◎</span>
+    <div><strong>Ripple</strong><span class="tagline">Official console · verify, manage and learn from incidents</span></div></div>
+  <div id="nav"></div>
+  <div class="top-actions" id="who" hidden>
+    <span class="badge" id="dept-badge"></span>
+    <button class="btn sm" type="button" id="logout">Sign out</button>
+  </div>
+</header>
+
+<section class="login" id="login-view" hidden>
+  <div class="card">
+    <h1>🏛️ Official sign-in</h1>
+    <p class="lead">For government officials who verify incidents and manage the response. Citizens see only what you publish.</p>
+    <form id="login-form">
+      <label class="field">Your department
+        <select id="login-dept" required></select></label>
+      <label class="field">Access code
+        <input type="password" id="login-code" required autocomplete="off"></label>
+      <p class="hint">Prototype: one shared demo code (<code>ripple2026</code>, set with <code>RIPPLE_OFFICIAL_CODE</code>). Production would use per-officer government login.</p>
+      <p class="err" id="login-err" role="alert"></p>
+      <button class="btn primary big" type="submit">Sign in</button>
+    </form>
+  </div>
+</section>
+
+<main class="page" id="app-view" hidden>
+  <div class="split">
+    <div>
+      <nav class="tabs2" role="tablist">
+        <button role="tab" data-tab="reports" aria-selected="true">📥 Incoming reports <span class="count" id="c-reports" hidden></span></button>
+        <button role="tab" data-tab="incidents">🚨 Active incidents <span class="count" id="c-incidents" hidden></span></button>
+        <button role="tab" data-tab="field">➕ Field report</button>
+        <button role="tab" data-tab="training">📈 Training data</button>
+      </nav>
+
+      <section id="tab-reports">
+        <div class="banner-note" id="scanner"></div>
+        <div id="report-list"></div>
+      </section>
+
+      <section id="tab-incidents" hidden><div id="incident-list"></div></section>
+
+      <section id="tab-field" hidden>
+        <div class="banner-note">Got a report by phone, wireless or from a field team? Log it here. Field reports from officials count as an <b>Official</b> source and go straight to the public once you publish.</div>
+        <div class="card" id="field-form"></div>
+      </section>
+
+      <section id="tab-training" hidden><div id="training"></div></section>
+    </div>
+    <div class="sticky-map"><div id="map"></div></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/static/common.js?v=1"></script>
+<script src="/static/official.js?v=1"></script>
+</body>
+</html>

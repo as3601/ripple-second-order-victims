@@ -246,3 +246,27 @@ Answer truthfully for your team.
 - Events are entered by hand; there's no live news or sensor feed yet.
 - Feedback is stored in a JSON file; production would use PostgreSQL + PostGIS.
 - The frontend is plain JS, not React (it looks the same; React was the planned production stack).
+
+
+## 10. New: live news, officials, public, drills (answers)
+**Q: Does it find disasters by itself?** Yes. It scans trusted news every 15 minutes (Google News RSS covering
+The Tribune, HT, Indian Express, PIB, …), extracts the type and place, and queues a report for officials.
+
+**Q: How do you stop fake news?** Five layers: source reliability tiers; 2+ independent trusted sources for
+"High trust"; filters for not-live and outside-the-tricity stories; a local-AI check; and mandatory official
+verification before anything is public. A viral social post scores "Low: treat as rumour".
+
+**Q: Why not Twitter/X?** Its API is paid and rate-limited. Official handles are on the roadmap. News outlets and
+government releases are more reliable for verification anyway.
+
+**Q: How does it get more accurate?** Officials file an after-action report with real casualties and tick which
+predictions came true. Ripple re-weights itself, stores the record as training data (exportable JSON), and
+the incident becomes a training drill.
+
+**Q: How do drills work?** A past disaster is replayed hour by hour in the order Ripple's cascade predicts. The
+trainee picks the best first action from three options against a timer, then sees the debrief, what actually
+happened, and a leaderboard. Drills are role-specific: Disaster Management, Police & traffic, Health.
+
+**Q: Are the historical drills accurate?** The event descriptions come from public reports (Feb 2022 Chandigarh
+power-strike blackout, July 2023 floods). The numbers inside a drill are Ripple's simulation, and each drill
+says so. Drills built from after-action reports use the real outcomes officials entered.

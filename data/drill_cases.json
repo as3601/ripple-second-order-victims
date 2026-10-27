@@ -1,0 +1,32 @@
+[
+ {
+  "id": "real_2022_power_strike",
+  "title": "Chandigarh power-department strike blackout",
+  "date": "February 2022",
+  "summary": "Employees of the UT Electricity Department went on strike against privatisation. Large parts of Chandigarh lost power, some areas for more than a day, with no staff available to restore supply.",
+  "what_happened": [
+   "Power went out across many sectors and was not restored for long stretches because staff were on strike.",
+   "Traffic signals went dark and water supply, which depends on electric pumps, was disrupted.",
+   "Hospitals had to rely on backup generators; routine work was reported to be affected.",
+   "The Punjab and Haryana High Court intervened and the strike was called off."
+  ],
+  "source_note": "Based on public news reports from February 2022. The casualty and patient numbers inside this drill are Ripple's simulation, not historical figures. Verify details before formal training use.",
+  "event": {"type": "power_outage", "lat": 30.7398, "lon": 76.7827, "radius_km": 4, "magnitude": 4, "duration_h": 36,
+            "label": "Chandigarh power-department strike blackout (Feb 2022)"}
+ },
+ {
+  "id": "real_2023_monsoon_floods",
+  "title": "Record monsoon rain and tricity floods",
+  "date": "July 2023",
+  "summary": "Exceptionally heavy rain on 8–9 July 2023 flooded large parts of the tricity. Sukhna Lake's floodgates were opened, and low-lying housing societies in Zirakpur and Dhakoli, as well as roads in Mohali and Chandigarh, went under water.",
+  "what_happened": [
+   "Roads and underpasses across Chandigarh, Mohali and Zirakpur were waterlogged.",
+   "Sukhna Lake's floodgates were opened as the water level rose, adding to flows downstream.",
+   "Residents of ground-floor flats in low-lying Zirakpur and Dhakoli societies were stranded or evacuated.",
+   "Schools were closed and people were advised to stay indoors."
+  ],
+  "source_note": "Based on public news reports from July 2023. The casualty and patient numbers inside this drill are Ripple's simulation, not historical figures. Verify details before formal training use.",
+  "event": {"type": "flood", "lat": 30.682, "lon": 76.805, "radius_km": 3.5, "magnitude": 5, "duration_h": 48,
+            "label": "Record monsoon rain and tricity floods (Jul 2023)"}
+ }
+]

@@ -1,3 +1,8 @@
 __pycache__/
 feedback.json
 *.pyc
+data/reports.json
+data/incidents.json
+data/aars.json
+data/drill_attempts.json
+data/*.tmp

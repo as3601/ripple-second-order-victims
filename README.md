@@ -21,6 +21,38 @@ python app.py
 Open http://127.0.0.1:8000 and click any scenario on the left. The map tiles and Leaflet load
 from a CDN, so you need internet.
 
+## Live operations: news → officials → public → training
+
+Ripple is more than a simulator. It runs a full incident workflow:
+
+| Page | Who it's for | What it does |
+|---|---|---|
+| **/official** | Government officials (sign in by department) | Incoming reports from automatic news monitoring, with a verification checklist. Verify & publish (set **gravity** and **time required to solve it**), post updates, then file an **after-action report** (deaths, injured, evacuated, which predictions came true). |
+| **/public** | Citizens | Only **officially verified** incidents: the problem, 1st/2nd/3rd-order victims, "Is my area affected?", what to do, hospital status, official updates, emergency numbers. |
+| **/drills** | Police, disaster-management and health trainees | Replays **real past tricity disasters** (Feb 2022 power strike, July 2023 floods), incidents from our own after-action reports, and practice scenarios as timed situation updates. Score, leaderboard, and "what actually happened". |
+
+Demo access code for officials: `ripple2026` (change with the `RIPPLE_OFFICIAL_CODE` environment variable).
+
+### How Ripple makes sure the news is accurate
+1. **Trusted sources only.** Every outlet has a reliability tier: official (PIB, police, administration) 1.0,
+   wire agencies 0.9, established media (Tribune, HT, Indian Express, …) 0.7–0.85, unknown 0.3.
+2. **Independent corroboration.** Reports of the same event type at the same place on the same day are
+   clustered, and 2+ independent trusted outlets are required for "High trust".
+3. **Live and local filters.** Court cases, budgets, anniversaries and stories outside the tricity are dropped
+   automatically (e.g. one real scan: 50 headlines → 1 relevant).
+4. **Local-AI check.** Qwen (Ollama) reads the headlines and judges whether they describe a current tricity disruption.
+5. **Human in the loop.** **Nothing reaches the public until a department official verifies it.** Rumours can be
+   rejected with a reason.
+
+News comes from Google News RSS searches (which index The Tribune, HT, Indian Express, PIB and others). Monitoring
+runs automatically every 15 minutes, plus a "Scan now" button. X/Facebook need paid APIs, so they're on the
+roadmap. Tick "include SIMULATED demo reports" to demo the workflow on a day with no real disaster; those are
+clearly labelled and never shown as real news.
+
+### How it learns
+After-action reports re-weight each consequence type (confirmed predictions gain weight, wrong ones lose it),
+are exportable as a training dataset (JSON) for a future ML model, and automatically become new training drills.
+
 ### Two views
 
 - **http://127.0.0.1:8000/**: the classic control-room dashboard (dark, everything on one screen).

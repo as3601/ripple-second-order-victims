@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ripple · Training drills</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="/static/detailed.css?v=2">
+<link rel="stylesheet" href="/static/ops.css?v=1">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true">◎</span>
+    <div><strong>Ripple Drills</strong><span class="tagline">Train police, disaster-management and health teams on real disasters</span></div></div>
+  <div id="nav"></div>
+</header>
+
+<main class="page">
+  <section id="library">
+    <h1>🎯 Training drills</h1>
+    <p class="lead">Each drill replays a disaster hour by hour. Situation updates arrive in the order Ripple's cascade predicts, and you choose the right action against the clock. Afterwards you see what actually happened.</p>
+    <nav class="tabs2" role="tablist" id="kinds">
+      <button role="tab" data-kind="real" aria-selected="true">📜 Real past events</button>
+      <button role="tab" data-kind="after_action">📋 From our after-action reports</button>
+      <button role="tab" data-kind="practice">🧪 Practice scenarios</button>
+    </nav>
+    <div class="drill-grid" id="grid"></div>
+  </section>
+
+  <section id="stage" hidden>
+    <div class="split">
+      <div id="panel"></div>
+      <div class="sticky-map"><div id="map"></div></div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/static/common.js?v=1"></script>
+<script src="/static/drills.js?v=1"></script>
+</body>
+</html>
