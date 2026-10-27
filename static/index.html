@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ripple — AI for Second-Order Victims</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="/static/style.css?v=2">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">◎</div>
+    <div>
+      <h1>Ripple</h1>
+      <p>AI for Second-Order Victims · Chandigarh Tricity</p>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><span id="k-people">—</span><label>people affected downstream</label></div>
+    <div class="kpi crit"><span id="k-critical">—</span><label>critical alerts</label></div>
+    <div class="kpi"><span id="k-zones">—</span><label>zones hit</label></div>
+    <div class="kpi"><span id="k-eta">—</span><label>first impact in</label></div>
+  </div>
+</header>
+
+<main>
+  <aside class="left">
+    <section>
+      <h2>1 · Event ingestion</h2>
+      <div id="scenarios"></div>
+    </section>
+    <section>
+      <h2>Custom event</h2>
+      <label>Type
+        <select id="ev-type">
+          <option value="bridge_collapse">Bridge collapse</option>
+          <option value="road_block">Road blockage / accident</option>
+          <option value="flood">Flood</option>
+          <option value="power_outage">Power outage</option>
+          <option value="factory_shutdown">Factory / workplace shutdown</option>
+          <option value="disease_outbreak">Disease outbreak</option>
+        </select>
+      </label>
+      <label id="f-edge">Road segment <small>(or click a road on the map)</small>
+        <select id="ev-edge"></select>
+      </label>
+      <label id="f-work" hidden>Workplace <select id="ev-work"></select></label>
+      <label id="f-zone" hidden>Zone <select id="ev-zone"></select></label>
+      <div id="f-loc" hidden>
+        <p class="hint" id="loc-hint">Click the map to set the epicentre.</p>
+        <label>Radius <output id="o-radius">1.5</output> km
+          <input type="range" id="ev-radius" min="0.5" max="4" step="0.1" value="1.5"></label>
+      </div>
+      <label>Magnitude <output id="o-mag">3</output>/5
+        <input type="range" id="ev-mag" min="1" max="5" value="3"></label>
+      <label>Expected duration (hours)
+        <input type="number" id="ev-dur" min="1" max="720" value="24"></label>
+      <button id="run" class="primary">Predict cascade →</button>
+      <p class="err" id="err"></p>
+    </section>
+    <section>
+      <h2>5 · Feedback loop</h2>
+      <p class="hint">Mark alerts as happened / didn't happen. Category weights re-calibrate future scores.</p>
+      <div id="calib" class="calib"></div>
+    </section>
+  </aside>
+
+  <div id="map"></div>
+
+  <aside class="right">
+    <div class="brief">
+      <div class="brief-head"><h2>Control-room briefing</h2><span id="brief-src" class="tag"></span></div>
+      <p id="brief">Choose a scenario to see who will be affected next, and when.</p>
+    </div>
+    <nav class="tabs">
+      <button data-tab="alerts" class="on">Ranked alerts</button>
+      <button data-tab="cascade">Cascade map</button>
+      <button data-tab="timeline">Timeline</button>
+      <button data-tab="hospitals">Hospitals</button>
+    </nav>
+    <div class="tab" id="tab-alerts"></div>
+    <div class="tab" id="tab-cascade" hidden></div>
+    <div class="tab" id="tab-timeline" hidden></div>
+    <div class="tab" id="tab-hospitals" hidden></div>
+  </aside>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/static/app.js?v=2"></script>
+</body>
+</html>
