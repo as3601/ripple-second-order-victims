@@ -226,11 +226,12 @@ def _vulnerability(z):
 
 
 def _impact(order, cat, title, people, eta_h, vuln, detail, action, zone=None, parent=None,
-            facility=None):
+            facility=None, facts=None):
+    """`facts` keeps raw values (delay, alternate hospital/route...) for the plain-language public view."""
     return {"order": order, "category": cat, "label": CATEGORY_LABEL[cat], "title": title,
             "people": int(people), "eta_h": round(eta_h, 1), "vulnerability": vuln,
             "detail": detail, "action": action, "zone": zone, "parent": parent,
-            "facility": facility}
+            "facility": facility, "facts": facts or {}}
 
 
 def _delay(base, new):
@@ -276,7 +277,8 @@ def run_cascade(ev):
                 f"{z['elderly'] * 100:.0f}% elderly residents.",
                 (f"Pre-position an ambulance inside {zn}; route to {city.HOSPITALS[h_new]['name']} via "
                  + " → ".join(alt)) if h_new else f"Airlift / NDRF boat standby for {zn}; set up field triage.",
-                zone=zid))
+                zone=zid, facts={"minutes": None if d == float("inf") else round(d), "hospital": city.HOSPITALS[h_new]["name"] if h_new else None,
+                                 "route": alt}))
 
         # Patients reassigned to a different hospital feed 3rd-order overload
         if h_new and h_base and h_new != h_base:
@@ -295,13 +297,15 @@ def run_cascade(ev):
                 "School-bus path depends on the disrupted corridor.",
                 f"Notify {s['name']}; switch to online classes or alternate bus via "
                 + (" → ".join(_route_names(g, at, s["at"])) or "nearest open school") + ".",
-                zone=zid))
+                zone=zid, facts={"school": s["name"], "closed": z["school"] in closed,
+                                 "minutes": None if z["school"] in closed else None if sd == float("inf") else round(sd),
+                                 "route": [] if z["school"] in closed else _route_names(g, at, s["at"])}))
             if dur >= 24 and z["low_income"] > 0.25:
                 impacts.append(_impact(
                     3, "meals", f"{zn}: low-income children miss mid-day meals", students * z["low_income"],
                     26, vuln, f"PM-POSHAN meal is the main meal for many of these {students * z['low_income']:.0f} children.",
                     "Run take-home ration distribution through anganwadi centres.", zone=zid,
-                    parent="school"))
+                    parent="school", facts={"school": s["name"]}))
 
         # 2nd order: medicine supply to neighbourhood pharmacies
         dep = city.DEPOTS[z["depot"]]
@@ -315,7 +319,7 @@ def run_cascade(ev):
                 f"Pharmacies hold ~12h of insulin & critical meds; supplied from {dep['name']}.",
                 (f"Re-source from {city.DEPOTS[other]['name']} via " + " → ".join(_route_names(g, city.DEPOTS[other]["at"], at)))
                 if alt_ok else f"Dispatch mobile pharmacy van / drone drop to {zn}.",
-                zone=zid))
+                zone=zid, facts={"minutes": None if md == float("inf") else round(md)}))
             if dur > 12:
                 impacts.append(_impact(
                     3, "medicine", f"{zn}: elderly miss chronic medicines (BP, diabetes, insulin)",
@@ -343,7 +347,7 @@ def run_cascade(ev):
                 wage_workers, 10, vuln,
                 f"Estimated wage loss ₹{wage_workers * DAILY_WAGE_INR * days / 1e5:.1f} lakh over {days} day(s).",
                 "Register affected workers with Labour Dept; trigger emergency wage support / MGNREGA-style work.",
-                zone=zid))
+                zone=zid, facts={"workplace": w["name"], "closed": True}))
             if dur >= 72:
                 impacts.append(_impact(
                     3, "food", f"{zn}: households slip into food insecurity", wage_workers * 3.5, 72,
@@ -354,7 +358,8 @@ def run_cascade(ev):
                 2, "income", f"{zn}: commute to {w['name']} {_fmt_delay(wd)}", workers, 10, vuln,
                 f"{wage_workers:.0f} of these are daily-wage workers with no paid leave.",
                 f"Run shuttle buses via " + (" → ".join(_route_names(g, at, w["at"])) or "alternate route")
-                + "; ask employers not to dock wages.", zone=zid))
+                + "; ask employers not to dock wages.", zone=zid,
+                facts={"workplace": w["name"], "minutes": None if wd == float("inf") else round(wd), "route": _route_names(g, at, w["at"])}))
             if wd == float("inf") or dur >= 12:
                 impacts.append(_impact(
                     3, "income", f"{zn}: daily-wage income lost", wage_workers, 14, vuln,
@@ -394,7 +399,8 @@ def run_cascade(ev):
                 f"Extra load from: {', '.join(hosp_sources[hid]) or 'capacity loss'}. "
                 f"{occ:.0f} patients for {cap:.0f} usable beds.",
                 f"Alert {h['name']} now: open surge beds, call in off-duty staff; divert stable cases to "
-                f"{city.HOSPITALS[others[0]]['name']}.", facility=hid, parent="ems"))
+                f"{city.HOSPITALS[others[0]]['name']}.", facility=hid, parent="ems",
+                facts={"hospital": h["name"], "alternative": city.HOSPITALS[others[0]]["name"]}))
 
     hidden = hidden_dependencies(ev)
     ranked = score(impacts)

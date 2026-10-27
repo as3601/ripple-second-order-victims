@@ -83,7 +83,7 @@ table.calib th, table.calib td { text-align: left; padding: 7px 6px; border-bott
 .inc-card[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
 .inc-card .ico { font-size: 28px; grid-row: span 3; }
 .inc-card b { font-size: 15px; }
-.inc-card small { color: var(--muted); font-size: 12.5px; }
+.inc-card small { color: var(--muted); font-size: 12.5px; grid-column: 2 / -1; }
 .grav { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; grid-row: span 3; align-self: start; }
 .grav.g1, .grav.g2 { background: var(--med-soft); color: var(--med); } .grav.g3 { background: var(--high-soft); color: var(--high); }
 .grav.g4, .grav.g5 { background: var(--crit-soft); color: var(--crit); }
@@ -95,6 +95,41 @@ table.calib th, table.calib td { text-align: left; padding: 7px 6px; border-bott
 .advice li { margin: 6px 0; }
 .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
 .empty b { display: block; font-size: 40px; }
+
+/* public: area answer, estimates, stamps */
+.myarea { margin-bottom: 10px; border-top: 5px solid var(--primary); }
+.myarea h2 { margin-top: 0; }
+.area-pick { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+.area-pick .field { flex: 1 1 240px; margin: 0; }
+.verdict-box { margin: 12px 0 8px; padding: 12px 14px; border-radius: 12px; font-size: 15px; }
+.verdict-box.ok { background: var(--low-soft); color: #14532d; }
+.verdict-box.warn { background: var(--high-soft); color: #7c2d12; border-left: 5px solid var(--high); }
+.verdict-box small { color: inherit; opacity: .8; }
+.checked { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.tip { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.tip:last-child { border-bottom: 0; }
+.tip.mine { background: #fff7d6; border-radius: 10px; padding: 10px; border-bottom: 0; margin: 4px 0; }
+.tip-head small { display: block; color: var(--muted); font-size: 12px; }
+.tip-est { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.tip-do { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 6px; }
+.tip-do > span { flex: 1 1 260px; }
+.est { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; padding: 1px 6px;
+  border-radius: 6px; background: var(--med-soft); color: var(--med); border: 1px solid #f0dca8; vertical-align: 1px; }
+.call { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; font-weight: 700; color: #fff;
+  background: var(--crit); padding: 7px 12px; border-radius: 99px; font-size: 14px; }
+.call span { font-weight: 500; font-size: 12px; opacity: .9; }
+.source { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+.stamps { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+.stale { flex-basis: 100%; color: var(--high); font-weight: 600; }
+.inc-card.done { opacity: .8; }
+.empty-state { text-align: center; padding: 28px 20px; }
+.empty-state > b { display: block; font-size: 40px; }
+.empty-state h3 { margin: 6px 0; }
+.empty-state p { color: var(--muted); }
+.empty-state .links { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.map-clear { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 500; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 99px; padding: 8px 16px; font-weight: 600; box-shadow: var(--shadow); }
+.map-clear[hidden] { display: none; }
 
 /* drills */
 .drill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }

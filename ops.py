@@ -7,13 +7,16 @@ Flow
   4. When resolved, the official files an after-action report (casualties, which predictions came true)
      -> re-weights the model (feedback.py), becomes training data, and becomes a drill case.
 """
+import math
 import os
+import re
 import time
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
+import city
 import engine
 import feedback
 import news
@@ -258,10 +261,127 @@ def _public_view(inc, with_totals=True):
     return out
 
 
+# Plain-language translation for citizens: no "2nd-order", no false precision,
+# and every warning paired with one concrete step and a number to call.
+GROUPS = {1: "direct", 2: "services", 3: "later"}
+CALLS = {"112": "Emergency", "108": "Ambulance", "101": "Fire", "1077": "Disaster helpline"}
+
+
+def _minutes(m):
+    if m is None:
+        return "may not be reachable by road"
+    if m <= 5:
+        return "up to 5 min longer"
+    lo = 5 * math.floor(m / 5)
+    return f"roughly {lo}–{lo + 5} min longer"
+
+
+def _people(n):
+    if n < 20:
+        return "a few people"
+    if n < 100:
+        return "dozens of people"
+    k = 10 ** (len(str(int(n))) - 2)  # 2 significant figures
+    return f"around {round(n / k) * k:,} people"
+
+
+def _soon(order, eta_h):
+    if order == 1:
+        return "now"
+    if eta_h < 1:
+        return "within the hour"
+    if eta_h < 36:
+        return f"in about {max(1, round(eta_h))} hours"
+    return f"in about {round(eta_h / 24)} days"
+
+
+def _route(r):
+    return f" Roads still open: {' → '.join(r[:3])}." if r else ""
+
+
+def _plain(x, zn):
+    """-> (headline, estimate or None, step, phone or None)"""
+    f, cat = x.get("facts", {}), x["category"]
+    if cat == "ems":
+        if f.get("minutes") is None:
+            return (f"Ambulances may not be able to reach {zn} by road", _minutes(None),
+                    "In an emergency call 112: rescue teams are being arranged for areas cut off by road.", "112")
+        return (f"Ambulances will take longer to reach {zn}", _minutes(f["minutes"]),
+                "In an emergency, call 108 straight away and give a nearby landmark."
+                + (f" Nearest hospital you can still reach: {f['hospital']}." if f.get("hospital") else "") + _route(f.get("route")), "108")
+    if cat == "hospital":
+        return (f"{f.get('hospital', 'A hospital')} emergency ward expected to be overcrowded", "expected to be very busy",
+                f"If it's not life-threatening, go to {f.get('alternative', 'another hospital')} instead to be seen sooner.", "108")
+    if cat == "medicine" and x["order"] == 2:
+        return (f"Chemists in {zn} may get fresh stock late", _minutes(f.get("minutes")).replace("min longer", "min delay"),
+                "Buy 2–3 days of your daily medicines (BP, diabetes, insulin) now.", "1077")
+    if cat == "medicine":
+        return (f"Elderly people in {zn} may run out of daily medicines", None,
+                "Check on elderly neighbours who live alone. The disaster helpline can arrange door-step delivery.", "1077")
+    if cat == "cold_chain":
+        return (f"Fridges at chemists and health centres in {zn} may lose power", None,
+                "Keep insulin in a cool box or covered clay pot, out of the sun. Phone the health centre before going for a vaccine.", "1077")
+    if cat == "residents":
+        return (f"Homes in {zn} at risk of flooding", None,
+                "Move to an upper floor, switch off power at the main switch, and call 112 if you are trapped.", "112")
+    if cat == "school":
+        if f.get("closed"):
+            return (f"Children from {zn}: {f.get('school', 'their school')} is closed or cut off", None,
+                    "Keep children at home and check with the school about online classes.", None)
+        return (f"School buses from {zn} to {f.get('school', 'school')} delayed", _minutes(f.get("minutes")),
+                "Check with the school before sending children." + _route(f.get("route")), None)
+    if cat == "meals":
+        return (f"Children in {zn} may miss their school mid-day meal", None,
+                "Ask your nearest anganwadi centre about take-home rations.", "1077")
+    if cat == "income" and f.get("closed"):
+        return (f"Daily-wage workers from {zn} lose work at {f['workplace']}", None,
+                "Register with the Labour Department for relief; the disaster helpline can tell you where.", "1077")
+    if cat == "income" and "minutes" in f:
+        return (f"Getting to work from {zn} will be slower", _minutes(f["minutes"]),
+                "Leave earlier than usual." + _route(f.get("route")), None)
+    if cat == "income":
+        return (f"Daily-wage workers in {zn} may lose income", None,
+                "Keep proof of work (contractor's name, site) to claim relief later.", "1077")
+    if cat == "food":
+        return (f"Some families in {zn} may run short of food", None,
+                "Community kitchens and ration points will be announced; ask the helpline for the nearest one.", "1077")
+    return (x["title"], None, "Follow official announcements.", "1077")
+
+
+def citizen_view(cascade):
+    items, seen = [], set()
+    for f in cascade["first_order"]:
+        head = re.sub(r"\s*\([^)]*\)", "", f["what"]).split(";")[0]
+        if head in seen:
+            continue
+        seen.add(head)
+        items.append({"group": "direct", "zone": f.get("zone"), "icon": "🧱",
+                      "headline": head,
+                      "estimate": None, "people": None, "when": "now", "step": None, "call": None})
+    for x in cascade["impacts"]:
+        zn = city.ZONES[x["zone"]]["name"] if x.get("zone") else ""
+        head, est, step, phone = _plain(x, zn)
+        items.append({"group": GROUPS[x["order"]], "zone": x.get("zone"), "category": x["category"],
+                      "headline": head, "estimate": est, "people": _people(x["people"]),
+                      "when": _soon(x["order"], x["eta_h"]), "step": step,
+                      "call": {"number": phone, "label": CALLS[phone]} if phone else None})
+    return items
+
+
+def _zones():
+    return [{"id": zid, "name": z["name"], "lat": city.JUNCTIONS[z["at"]][1], "lon": city.JUNCTIONS[z["at"]][2]}
+            for zid, z in city.ZONES.items()]
+
+
 @router.get("/api/public/incidents")
 def public_incidents():
     incs = sorted(store.load("incidents").values(), key=lambda i: -i["updated"])
-    return {"active": [_public_view(i) for i in incs if i["status"] == "active"],
+    active = []
+    for i in incs:
+        if i["status"] == "active":
+            c = engine.run_cascade(incident_event(i))
+            active.append({**_public_view(i, with_totals=False), "totals": c["totals"], "citizen": citizen_view(c)})
+    return {"checked_at": time.time(), "zones": _zones(), "active": active,
             "resolved": [_public_view(i, with_totals=False) for i in incs if i["status"] == "resolved"][:5]}
 
 
@@ -270,7 +390,8 @@ def incident_cascade(iid: str):
     inc = store.load("incidents").get(iid)
     if not inc:
         raise HTTPException(404, "No such incident")
-    return {"incident": _public_view(inc, with_totals=False), "cascade": engine.run_cascade(incident_event(inc))}
+    c = engine.run_cascade(incident_event(inc))
+    return {"incident": _public_view(inc, with_totals=False), "cascade": c, "citizen": citizen_view(c)}
 
 
 # --------------------------------------------------------------- training
