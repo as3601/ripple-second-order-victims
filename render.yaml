@@ -1,0 +1,20 @@
+# One-click deploy on Render's free plan: New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: ripple
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /api/scenarios
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: PYTHONIOENCODING
+        value: utf-8
+      - key: RIPPLE_OFFICIAL_CODE  # random private sign-in code for officials; read it in the Render dashboard
+        generateValue: true
+      - key: RIPPLE_DEMO  # start with the SIMULATED demo incidents so the public page isn't empty
+        value: "1"
+      - key: GROQ_API_KEY  # optional free key from console.groq.com for AI briefings (no local Ollama in the cloud)
+        sync: false

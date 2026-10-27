@@ -94,7 +94,18 @@ Two "what if?" simulators run on the same engine. They aren't linked from the me
 
 Both use the same API and engine.
 
-### Share with your team (public link)
+### Host it online (free, permanent link)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/as3601/ripple-second-order-victims)
+
+`render.yaml` deploys Ripple on Render's free plan at a permanent `https://….onrender.com` link that doesn't need
+your laptop. Render generates a random official access code (see *Environment → RIPPLE_OFFICIAL_CODE* in the
+Render dashboard) and the demo incidents load at startup. Free-plan limits:
+- It sleeps after 15 minutes without visitors; the first visit afterwards takes about a minute to wake it.
+- Its disk is temporary: incidents, comments and drill scores reset when it restarts or redeploys.
+- There's no Ollama in the cloud, so AI briefings use the built-in template unless you add a free `GROQ_API_KEY`.
+
+### Share with your team from your laptop (temporary link)
 
 Double-click **`share.bat`**. It starts Ripple and opens a free Cloudflare tunnel, then prints a public
 `https://….trycloudflare.com` link anyone can open, phones included. It also generates a **private official

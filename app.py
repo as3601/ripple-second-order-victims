@@ -92,6 +92,13 @@ if __name__ == "__main__":
     import uvicorn
 
     import news
+    import store
+    if os.environ.get("RIPPLE_DEMO") == "1" and not store.load("incidents"):
+        import demo_incidents  # hosted demo: start with the labelled SIMULATED incidents
+        demo_incidents.add()
     threading.Thread(target=llm.warm_up, daemon=True).start()
     threading.Thread(target=news.auto_scan_forever, daemon=True).start()  # automatic news monitoring
-    uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("RIPPLE_PORT", "8000")))
+    # Cloud hosts (Render) give a PORT and need every interface; locally stay on 127.0.0.1.
+    cloud = "PORT" in os.environ
+    uvicorn.run(app, host="0.0.0.0" if cloud else "127.0.0.1",
+                port=int(os.environ.get("PORT") or os.environ.get("RIPPLE_PORT", "8000")))
