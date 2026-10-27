@@ -127,9 +127,9 @@ table.calib th, table.calib td { text-align: left; padding: 7px 6px; border-bott
 .empty-state h3 { margin: 6px 0; }
 .empty-state p { color: var(--muted); }
 .empty-state .links { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-.map-clear { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 500; background: var(--surface);
+.sticky-map > .map-clear { position: absolute; inset: auto; top: 12px; left: 50%; transform: translateX(-50%); z-index: 500; background: var(--surface);
   border: 1px solid var(--border); border-radius: 99px; padding: 8px 16px; font-weight: 600; box-shadow: var(--shadow); }
-.map-clear[hidden] { display: none; }
+.sticky-map > .map-clear[hidden] { display: none; }
 
 /* drills */
 .drill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
