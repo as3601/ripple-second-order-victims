@@ -14,6 +14,11 @@ async function boot() {
   $("#login-dept").innerHTML = Object.entries(depts).map(([k, d]) => `<option value="${k}">${esc(d.name)}</option>`).join("");
   if (R.code && dept && depts[dept]) return enter();
   $("#login-view").hidden = false;
+  const hint = await api("/api/official/hint"); // public demo deployments show their code so judges can sign in
+  if (hint.demo_code) {
+    $("#demo-code").innerHTML = `🔑 Demo access code: <b>${esc(hint.demo_code)}</b><br><small>Type it into the box above to try the officials' console.</small>`;
+    $("#demo-code").hidden = false;
+  }
 }
 $("#login-form").addEventListener("submit", async (e) => {
   e.preventDefault();

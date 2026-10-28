@@ -12,8 +12,10 @@ services:
         value: 3.12.7
       - key: PYTHONIOENCODING
         value: utf-8
-      - key: RIPPLE_OFFICIAL_CODE  # random private sign-in code for officials; read it in the Render dashboard
-        generateValue: true
+      - key: RIPPLE_OFFICIAL_CODE  # public demo code, printed on the sign-in page and in the deck for judges
+        value: codeyudh2026
+      - key: RIPPLE_SHOW_CODE  # show the code under the sign-in box (demo deployments only)
+        value: "1"
       - key: RIPPLE_DEMO  # start with the SIMULATED demo incidents so the public page isn't empty
         value: "1"
       - key: GROQ_API_KEY  # optional free key from console.groq.com for AI briefings (no local Ollama in the cloud)

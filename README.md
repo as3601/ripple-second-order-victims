@@ -33,7 +33,9 @@ Ripple is more than a simulator. It runs a full incident workflow:
 | **/public** | Citizens | Only **officially verified** incidents, in plain language (see below). Citizens can rate and comment on **resolved** incidents. |
 | **/drills** | Police, disaster-management and health trainees | Replays **real past tricity disasters** (Feb 2022 power strike, July 2023 floods), incidents from our own after-action reports, and practice scenarios as timed situation updates. Score, leaderboard, and "what actually happened". |
 
-Demo access code for officials: `ripple2026` (change with the `RIPPLE_OFFICIAL_CODE` environment variable).
+Official access code: on the **live demo** it is **`codeyudh2026`**, also printed under the sign-in box. Locally the default is
+`ripple2026`; change it with the `RIPPLE_OFFICIAL_CODE` environment variable. `RIPPLE_SHOW_CODE=1` prints the code on the
+sign-in page (for public demos only).
 
 ### The public page, designed for citizens
 - **Plain words.** "1st/2nd/3rd-order victims" become **Directly hit**, **Everyday services affected** and
@@ -101,8 +103,8 @@ Both use the same API and engine.
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/as3601/ripple-second-order-victims)
 
 `render.yaml` deploys Ripple on Render's free plan at a permanent `https://….onrender.com` link that doesn't need
-your laptop. Render generates a random official access code (see *Environment → RIPPLE_OFFICIAL_CODE* in the
-Render dashboard) and the demo incidents load at startup. Free-plan limits:
+your laptop. The official access code there is `codeyudh2026` and is shown on the sign-in page, so judges can try the
+officials' console; the demo incidents load at startup. Free-plan limits:
 - It sleeps after 15 minutes without visitors; the first visit afterwards takes about a minute to wake it.
 - Its disk is temporary: incidents, comments and drill scores reset when it restarts or redeploys.
 - There's no Ollama in the cloud, so AI briefings use the built-in template unless you add a free `GROQ_API_KEY`.

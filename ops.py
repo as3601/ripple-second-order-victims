@@ -25,6 +25,7 @@ from models import SCENARIOS, Event, validate_event
 
 router = APIRouter()
 OFFICIAL_CODE = os.environ.get("RIPPLE_OFFICIAL_CODE", "ripple2026")  # demo access code; change for real use
+SHOW_CODE = os.environ.get("RIPPLE_SHOW_CODE") == "1"  # public demo only: print the code on the sign-in page
 
 DEPARTMENTS = {
     "dm": {"name": "District Disaster Management Cell", "types": "all"},
@@ -69,6 +70,11 @@ class Login(BaseModel):
 @router.get("/api/departments")
 def departments():
     return DEPARTMENTS
+
+
+@router.get("/api/official/hint")
+def login_hint():
+    return {"demo_code": OFFICIAL_CODE} if SHOW_CODE else {}
 
 
 @router.post("/api/official/login")
