@@ -58,6 +58,7 @@ window.R = (() => {
     const graph = await api("/api/graph");
     const map = L.map(el).setView([30.72, 76.77], 12);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors", maxZoom: 18 }).addTo(map);
+    addMapLegend(map);
     const nodes = Object.fromEntries(graph.nodes.map((n) => [n.id, n]));
     const edges = {}, zones = {}, facs = {};
     for (const e of graph.edges) {

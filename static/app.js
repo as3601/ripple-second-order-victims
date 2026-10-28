@@ -17,16 +17,7 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors", maxZoom: 18,
 }).addTo(map);
 
-const legend = L.control({ position: "bottomleft" });
-legend.onAdd = () => {
-  const d = L.DomUtil.create("div", "legend");
-  d.innerHTML = `<b style="background:#ff4d6d"></b>Cut (1st order)<br><b style="background:#ff9f1c"></b>Slowed<br>
-    <b style="background:#ffd166"></b>Diverted-traffic congestion<br>` +
-    Object.values(KIND_STYLE).map((k) => `<s style="background:${k.color}"></s>${k.label}`).join("<br>") +
-    `<br><s style="background:#4cc9f055;border:1px solid #4cc9f0"></s>Residential zone (colour = worst alert)`;
-  return d;
-};
-legend.addTo(map);
+addMapLegend(map, DARK_LEGEND);
 
 async function api(path, body) {
   const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});

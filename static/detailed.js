@@ -77,15 +77,7 @@ const KIND = {
 };
 const baseStyle = (e) => ({ color: e.kind === "bridge" ? "#0284c7" : e.kind === "flyover" ? "#4f46e5" : "#64748b", weight: e.kind === "road" ? 3.5 : 5.5, opacity: 0.85, dashArray: null });
 
-const legend = L.control({ position: "bottomleft" });
-legend.onAdd = () => {
-  const d = L.DomUtil.create("div", "legend");
-  d.innerHTML = `<b style="background:#dc2626"></b>Cut / closed<br><b style="background:#f59e0b"></b>Slowed<br><b style="background:#eab308"></b>Jammed by diverted traffic<br>` +
-    Object.values(KIND).map((k) => `<s style="background:${k.color}"></s>${k.label}`).join("<br>") +
-    `<br><s style="background:#2563eb33;border:1px solid #2563eb"></s>Residential area`;
-  return d;
-};
-legend.addTo(map);
+addMapLegend(map);
 
 function drawGraph() {
   const nodeById = Object.fromEntries(graph.nodes.map((n) => [n.id, n]));
